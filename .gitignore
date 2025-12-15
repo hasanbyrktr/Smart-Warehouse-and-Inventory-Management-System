@@ -1,0 +1,19 @@
+# Maven
+target/
+*.log
+
+# Eclipse / STS
+.classpath
+.project
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lombok
+.factorypath
