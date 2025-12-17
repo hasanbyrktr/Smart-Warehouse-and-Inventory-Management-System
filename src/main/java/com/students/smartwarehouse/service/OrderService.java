@@ -1,48 +1,61 @@
 package com.students.smartwarehouse.service;
 
-import com.students.smartwarehouse.entity.Order;
-import com.students.smartwarehouse.entity.Stock;
-import com.students.smartwarehouse.entity.OrderType; // Enum'ın yeri
+import com.students.smartwarehouse.entity.*;
 import com.students.smartwarehouse.repository.OrderRepository;
+import com.students.smartwarehouse.repository.ProductRepository;
 import com.students.smartwarehouse.repository.StockRepository;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j; // <-- LOG IMPORTU
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
+@Transactional
+@Slf4j // (Loglama özelliğini açar)
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
     private final StockRepository stockRepository;
 
-    public OrderService(OrderRepository orderRepository, StockRepository stockRepository) {
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository, StockRepository stockRepository) {
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
         this.stockRepository = stockRepository;
     }
 
-    @Transactional
     public Order createOrder(Order order) {
-        // 1. Siparişi kaydet
-        Order savedOrder = orderRepository.save(order);
+        // LOG 1: İşlem başladığında bilgi ver
+        log.info("Sipariş isteği alındı. Ürün ID: {}", order.getProduct().getId());
 
-        // 2. İlgili ürünün stoğunu bul
-        Stock stock = stockRepository.findByProductId(order.getProduct().getId())
-                .orElseThrow(() -> new RuntimeException("Stok bulunamadı!"));
+        Product product = productRepository.findById(order.getProduct().getId())
+                .orElseThrow(() -> new RuntimeException("Ürün bulunamadı!"));
 
-        // 3. Sipariş türüne göre stoğu güncelle
+        Stock stock = stockRepository.findByProductId(product.getId())
+                .orElseThrow(() -> new RuntimeException("Stok kaydı yok!"));
+
         if (order.getOrderType() == OrderType.IN) {
-            // Depoya giriş (Satın alma) -> Stok artar
             stock.setQuantity(stock.getQuantity() + order.getQuantity());
         } else if (order.getOrderType() == OrderType.OUT) {
-            // Depodan çıkış (Satış) -> Stok azalır
             if (stock.getQuantity() < order.getQuantity()) {
-                throw new RuntimeException("Yetersiz Stok! Mevcut: " + stock.getQuantity());
+                // LOG 2: Hata durumunda kırmızı log bas
+                log.error("Yetersiz stok! İstenen: {}, Mevcut: {}", order.getQuantity(), stock.getQuantity());
+                throw new RuntimeException("Yetersiz Stok!");
             }
             stock.setQuantity(stock.getQuantity() - order.getQuantity());
         }
 
-        // 4. Güncel stoğu kaydet (Burada senin TRIGGER devreye girecek!)
         stockRepository.save(stock);
-
+        
+        order.setOrderDate(LocalDateTime.now());
+        order.setStatus(OrderStatus.COMPLETED);
+        
+        Order savedOrder = orderRepository.save(order);
+        
+        // LOG 3: Başarılı bitişte bilgi ver
+        log.info("Sipariş başarıyla tamamlandı. Order ID: {}", savedOrder.getId());
+        
         return savedOrder;
     }
 }
