@@ -1,0 +1,12 @@
+package com.students.smartwarehouse.repository;
+
+import com.students.smartwarehouse.entity.StockAlert;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface StockAlertRepository extends JpaRepository<StockAlert, Long> {
+    // Çözülmemiş alarmları listelemek için:
+    List<StockAlert> findByIsResolvedFalse();
+}
