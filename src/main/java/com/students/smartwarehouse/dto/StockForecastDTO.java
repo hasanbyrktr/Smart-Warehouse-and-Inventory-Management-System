@@ -6,6 +6,6 @@ import lombok.Data;
 public class StockForecastDTO {
     private String productName;
     private Integer currentStock;
-    private Double dailyUsageRate; // Günlük ortalama tüketim
-    private String estimatedDaysLeft; // "5 gün", "Yeterli", "Stok Yok" gibi
+    private Double dailyUsageRate;
+    private String estimatedDaysLeft;
 }

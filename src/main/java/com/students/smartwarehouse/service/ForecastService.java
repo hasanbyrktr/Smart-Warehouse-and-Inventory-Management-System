@@ -25,10 +25,9 @@ public class ForecastService {
     public StockForecastDTO predictStockDepletion(Long productId) {
         StockForecastDTO forecast = new StockForecastDTO();
 
-        // 1. Stok bilgisini çek
         Optional<Stock> stockOpt = stockRepository.findByProductId(productId);
         if (stockOpt.isEmpty()) {
-            return null; // Ürün veya stok yok
+            return null;
         }
         Stock stock = stockOpt.get();
         Product product = stock.getProduct();
@@ -36,22 +35,18 @@ public class ForecastService {
         forecast.setProductName(product.getName());
         forecast.setCurrentStock(stock.getQuantity());
 
-        // 2. Son 30 gündeki toplam çıkışları hesapla
         LocalDateTime thirtyDaysAgo = LocalDateTime.now().minusDays(30);
         Integer totalSold = orderRepository.findTotalSalesSince(productId, OrderType.OUT, thirtyDaysAgo);
 
-        // Eğer hiç satış yoksa
         if (totalSold == null || totalSold == 0) {
             forecast.setDailyUsageRate(0.0);
-            forecast.setEstimatedDaysLeft("Satış verisi yok / Stok hareketsiz");
+            forecast.setEstimatedDaysLeft("Yeterli Veri Yok");
             return forecast;
         }
 
-        // 3. Günlük ortalama tüketimi bul
         double dailyRate = totalSold / 30.0;
         forecast.setDailyUsageRate(dailyRate);
 
-        // 4. Kaç gün yeteceğini hesapla (Mevcut Stok / Günlük Hız)
         if (dailyRate > 0) {
             int daysLeft = (int) (stock.getQuantity() / dailyRate);
             forecast.setEstimatedDaysLeft(daysLeft + " Gün");

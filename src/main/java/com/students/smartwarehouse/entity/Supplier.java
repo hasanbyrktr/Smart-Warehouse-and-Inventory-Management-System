@@ -1,5 +1,6 @@
 package com.students.smartwarehouse.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,15 +10,15 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Entity // Bu sınıfın bir veritabanı tablosu olduğunu belirtir
-@Table(name = "suppliers") // Veritabanındaki 'suppliers' tablosuna karşılık gelir
-@Data // Lombok: Getter, Setter, toString vb. otomatik ekler
-@NoArgsConstructor // Parametresiz constructor
-@AllArgsConstructor // Tüm parametreli constructor
+@Entity
+@Table(name = "suppliers")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Supplier {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto Increment (Otomatik Artan ID)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false, length = 100)
@@ -35,13 +36,14 @@ public class Supplier {
     @Column(columnDefinition = "TEXT")
     private String address;
 
-    @CreationTimestamp // Kayıt eklendiğinde o anki saati otomatik basar
+    @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    // İLİŞKİ: Bir Tedarikçinin birden çok ürünü olabilir (One-To-Many)
-    // 'mappedBy' -> Product sınıfındaki 'supplier' değişkenine referans verir.
-    // Cascade -> Tedarikçi silinirse ürünlere ne olacağını veritabanı ayarlar (burada Java tarafını boş bıraktık)
+    // --- DÜZELTME  ---
+    // @JsonIgnore: JSON oluştururken bu listeyi görmezden gel.
+    // Böylece "Ürün -> Tedarikçi -> Ürün..." sonsuz döngüsü kırılır.
     @OneToMany(mappedBy = "supplier")
+    @JsonIgnore
     private List<Product> products;
 }
