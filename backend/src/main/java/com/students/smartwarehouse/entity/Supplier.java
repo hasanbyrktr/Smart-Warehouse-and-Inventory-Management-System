@@ -41,15 +41,9 @@ public class Supplier {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-<<<<<<< HEAD
-    @OneToMany(mappedBy = "supplier")
-=======
-    // --- DÜZELTME  ---
-    // @JsonIgnore: JSON oluştururken bu listeyi görmezden gel.
-    // Böylece "Ürün -> Tedarikçi -> Ürün..." sonsuz döngüsü kırılır.
-
-    @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true) // <-- BURASI DEĞİŞTİ
->>>>>>> eb61aaca5b163911535ee34e4853f7d59606495e
+    // --- ZİNCİRLEME SİLME (CASCADE) AYARI ---
+    // Tedarikçi silinince ürünler de silinsin, yetim veri kalmasın
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Product> products;
 }

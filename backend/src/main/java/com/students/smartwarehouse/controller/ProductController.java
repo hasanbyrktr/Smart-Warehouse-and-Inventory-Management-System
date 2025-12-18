@@ -21,20 +21,15 @@ public class ProductController {
     public List<Product> getAllProducts() {
         return productService.getAllProducts();
     }
-    
 
     @PostMapping
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         return ResponseEntity.ok(productService.saveProduct(product));
     }
-<<<<<<< HEAD
 
-=======
-    
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
         return ResponseEntity.ok().build();
     }
->>>>>>> eb61aaca5b163911535ee34e4853f7d59606495e
 }
