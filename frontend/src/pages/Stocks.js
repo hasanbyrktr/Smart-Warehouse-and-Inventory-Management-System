@@ -1,65 +1,83 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-const Suppliers = () => {
-    const [suppliers, setSuppliers] = useState([]);
-    const [newSupplier, setNewSupplier] = useState({ name: '', contact: '', email: '' });
+const Stocks = () => {
+    const [stocks, setStocks] = useState([]);
     const theme = { primary: '#2D3748', accent: '#F97316', bg: '#F8FAFC' };
 
     useEffect(() => {
-        fetchSuppliers();
+        // Backend'deki StockController'dan verileri çekiyoruz
+        axios.get("http://localhost:8080/api/stocks")
+            .then(res => setStocks(res.data))
+            .catch(err => console.error("Stoklar yüklenemedi:", err));
     }, []);
 
-    const fetchSuppliers = () => {
-        axios.get("http://localhost:8080/api/suppliers").then(res => setSuppliers(res.data));
-    };
-
-    const handleAdd = (e) => {
-        e.preventDefault();
-        axios.post("http://localhost:8080/api/suppliers", newSupplier).then(() => {
-            setNewSupplier({ name: '', contact: '', email: '' });
-            fetchSuppliers();
-        });
+    // Stok seviyesine göre görsel geri bildirim mantığı
+    const getLevelInfo = (qty, min) => {
+        if (qty <= 0) return { label: 'TÜKENDİ', color: '#EF4444', percent: 0 };
+        if (qty < min) return { label: 'KRİTİK', color: '#F59E0B', percent: (qty / 100) * 100 };
+        return { label: 'YETERLİ', color: '#10B981', percent: 100 };
     };
 
     return (
         <div style={{ padding: '40px 60px', backgroundColor: theme.bg, minHeight: '100vh' }}>
-            <h1 style={{ fontWeight: '800', color: theme.primary, marginBottom: '30px' }}>Tedarikçi Yönetimi</h1>
+            <header style={{ marginBottom: '40px', display: 'flex', justifyContent: 'space-between' }}>
+                <div>
+                    <h1 style={{ fontSize: '28px', fontWeight: '800', color: theme.primary, margin: 0 }}>Stok Kontrol Merkezi</h1>
+                    <p style={{ color: '#64748B' }}>Anlık envanter miktarları ve kritik seviye takibi</p>
+                </div>
+            </header>
 
-            <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '20px', marginBottom: '30px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                <h4 style={{ color: theme.accent, marginBottom: '20px' }}>Yeni Tedarikçi Kaydı</h4>
-                <form onSubmit={handleAdd} style={{ display: 'flex', gap: '15px' }}>
-                    <input style={inputStyle} placeholder="Firma Adı" value={newSupplier.name} onChange={e => setNewSupplier({ ...newSupplier, name: e.target.value })} required />
-                    <input style={inputStyle} placeholder="İletişim" value={newSupplier.contact} onChange={e => setNewSupplier({ ...newSupplier, contact: e.target.value })} />
-                    <input style={inputStyle} placeholder="E-posta" value={newSupplier.email} onChange={e => setNewSupplier({ ...newSupplier, email: e.target.value })} />
-                    <button type="submit" style={{ backgroundColor: theme.primary, color: 'white', border: 'none', padding: '10px 25px', borderRadius: '10px', fontWeight: '700', cursor: 'pointer' }}>EKLE</button>
-                </form>
-            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '25px' }}>
+                {stocks.map(item => {
+                    const status = getLevelInfo(item.quantity, item.minimumQuantity);
+                    return (
+                        <div key={item.id} style={stockCardStyle}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
+                                <span style={{ fontWeight: '800', color: theme.primary }}>{item.product.name}</span>
+                                <span style={{ ...badgeStyle, backgroundColor: status.color }}>{status.label}</span>
+                            </div>
 
-            <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '20px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                    <thead>
-                        <tr style={{ textAlign: 'left', borderBottom: '2px solid #E2E8F0', fontSize: '12px', color: '#64748B' }}>
-                            <th style={{ padding: '15px' }}>TEDARİKÇİ ADI</th>
-                            <th>İLETİŞİM</th>
-                            <th>E-POSTA</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {suppliers.map(s => (
-                            <tr key={s.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                                <td style={{ padding: '15px', fontWeight: '600' }}>{s.name}</td>
-                                <td>{s.contact}</td>
-                                <td>{s.email}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                            <div style={{ fontSize: '12px', color: '#64748B', marginBottom: '5px' }}>
+                                Mevcut Miktar: <strong>{item.quantity}</strong> / Eşik: {item.minimumQuantity}
+                            </div>
+
+                            {/* Görsel Stok Çubuğu */}
+                            <div style={{ height: '8px', backgroundColor: '#E2E8F0', borderRadius: '4px', overflow: 'hidden' }}>
+                                <div style={{
+                                    width: `${Math.min(status.percent, 100)}%`,
+                                    height: '100%',
+                                    backgroundColor: status.color,
+                                    transition: 'width 0.5s ease-in-out'
+                                }}></div>
+                            </div>
+
+                            <div style={{ marginTop: '15px', fontSize: '11px', color: '#94A3B8', fontStyle: 'italic' }}>
+                                Son Güncelleme: {new Date(item.lastUpdated).toLocaleDateString()}
+                            </div>
+                        </div>
+                    );
+                })}
             </div>
         </div>
     );
 };
 
-const inputStyle = { flex: 1, padding: '12px', borderRadius: '10px', border: '1px solid #E2E8F0', outline: 'none' };
+// CSS Stilleri
+const stockCardStyle = {
+    backgroundColor: 'white',
+    padding: '25px',
+    borderRadius: '20px',
+    boxShadow: '0 10px 25px rgba(0,0,0,0.05)',
+    border: '1px solid #E2E8F0'
+};
 
-export default Suppliers;
+const badgeStyle = {
+    color: 'white',
+    padding: '4px 10px',
+    borderRadius: '8px',
+    fontSize: '10px',
+    fontWeight: '800'
+};
+
+export default Stocks;

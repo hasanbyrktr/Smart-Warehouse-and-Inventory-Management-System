@@ -26,4 +26,5 @@ public class ProductController {
     public ResponseEntity<Product> createProduct(@RequestBody Product product) {
         return ResponseEntity.ok(productService.saveProduct(product));
     }
+
 }
