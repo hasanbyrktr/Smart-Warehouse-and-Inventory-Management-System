@@ -22,6 +22,12 @@ public class ProductService {
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
+    
+
+
+    public void deleteProduct(Long id) {
+        productRepository.deleteById(id);
+    }
 
     @Transactional // Hem ürün hem stok tablosuna yazdığımız için işlem bütünlüğü şart
     public Product saveProduct(Product product) {

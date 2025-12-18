@@ -1,7 +1,6 @@
-
-
 package com.students.smartwarehouse.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore; // <-- BU EKLENDİ
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List; // <-- BU EKLENDİ
 
 @Entity
 @Table(name = "products")
@@ -26,14 +26,12 @@ public class Product {
     @Column(nullable = false, length = 150)
     private String name;
 
-    // SKU: Stok Kodu (Benzersiz olmalı)
     @Column(nullable = false, unique = true, length = 50)
     private String sku;
 
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    // Para birimi olduğu için BigDecimal kullanıyoruz (Double hata payı yaratabilir)
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
@@ -41,10 +39,20 @@ public class Product {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    // İLİŞKİ: Birçok Ürün tek bir Tedarikçiye aittir (Many-To-One)
+    // --- MEVCUT TEDARİKÇİ İLİŞKİSİ ---
     @ManyToOne
-    @JoinColumn(name = "supplier_id") // Veritabanındaki foreign key sütun adı
+    @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
-    
+    // --- YENİ EKLENEN 1: STOK SİLME AYARI ---
+    // Ürün silinince, Stok tablosundaki miktar bilgisi de silinsin
+    @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private Stock stock;
+
+    // --- YENİ EKLENEN 2: SİPARİŞ SİLME AYARI ---
+    // Ürün silinince, o ürünün tüm geçmiş siparişleri de silinsin
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Order> orders;
 }

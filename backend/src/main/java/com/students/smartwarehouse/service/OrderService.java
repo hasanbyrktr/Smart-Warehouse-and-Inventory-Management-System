@@ -5,14 +5,15 @@ import com.students.smartwarehouse.repository.OrderRepository;
 import com.students.smartwarehouse.repository.ProductRepository;
 import com.students.smartwarehouse.repository.StockRepository;
 import jakarta.transaction.Transactional;
-import lombok.extern.slf4j.Slf4j; // <-- LOG IMPORTU
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List; // <-- BU IMPORT EKLENDİ
 
 @Service
 @Transactional
-@Slf4j // (Loglama özelliğini açar)
+@Slf4j
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -25,6 +26,13 @@ public class OrderService {
         this.stockRepository = stockRepository;
     }
 
+    // --- YENİ EKLENEN KISIM: SİPARİŞLERİ LİSTELEME ---
+    public List<Order> getAllOrders() {
+        log.info("Tüm siparişlerin listesi istendi.");
+        return orderRepository.findAll();
+    }
+
+    // --- MEVCUT KISIM: SİPARİŞ OLUŞTURMA ---
     public Order createOrder(Order order) {
         // LOG 1: İşlem başladığında bilgi ver
         log.info("Sipariş isteği alındı. Ürün ID: {}", order.getProduct().getId());
@@ -45,7 +53,7 @@ public class OrderService {
             }
             stock.setQuantity(stock.getQuantity() - order.getQuantity());
         }
-
+        
         stockRepository.save(stock);
         
         order.setOrderDate(LocalDateTime.now());
