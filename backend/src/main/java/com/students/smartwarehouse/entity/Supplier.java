@@ -1,6 +1,6 @@
 package com.students.smartwarehouse.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore; 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,7 +41,7 @@ public class Supplier {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    // --- DÜZELTME  ---
+    // --- DÜZELTME ---
     // @JsonIgnore: JSON oluştururken bu listeyi görmezden gel.
     // Böylece "Ürün -> Tedarikçi -> Ürün..." sonsuz döngüsü kırılır.
     @OneToMany(mappedBy = "supplier")

@@ -1,7 +1,7 @@
 package com.students.smartwarehouse.entity;
 
 public enum OrderStatus {
-    PENDING,   // Beklemede
+    PENDING, // Beklemede
     COMPLETED, // Tamamlandı
-    CANCELLED  // İptal Edildi
+    CANCELLED // İptal Edildi
 }
