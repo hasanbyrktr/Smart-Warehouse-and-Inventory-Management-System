@@ -30,5 +30,5 @@ public class StockAlert {
     private String message;
 
     @Column(name = "is_resolved")
-    private boolean isResolved = false; // Sorun çözüldü mü?
+    private boolean isResolved = false; 
 }

@@ -41,9 +41,6 @@ public class Supplier {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    // --- DÜZELTME ---
-    // @JsonIgnore: JSON oluştururken bu listeyi görmezden gel.
-    // Böylece "Ürün -> Tedarikçi -> Ürün..." sonsuz döngüsü kırılır.
     @OneToMany(mappedBy = "supplier")
     @JsonIgnore
     private List<Product> products;
