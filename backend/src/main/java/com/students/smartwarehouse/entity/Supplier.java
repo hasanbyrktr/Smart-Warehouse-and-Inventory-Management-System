@@ -43,7 +43,8 @@ public class Supplier {
     // --- DÜZELTME  ---
     // @JsonIgnore: JSON oluştururken bu listeyi görmezden gel.
     // Böylece "Ürün -> Tedarikçi -> Ürün..." sonsuz döngüsü kırılır.
-    @OneToMany(mappedBy = "supplier")
+
+    @OneToMany(mappedBy = "supplier", cascade = CascadeType.ALL, orphanRemoval = true) // <-- BURASI DEĞİŞTİ
     @JsonIgnore
     private List<Product> products;
 }

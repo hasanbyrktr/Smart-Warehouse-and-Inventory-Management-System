@@ -5,6 +5,8 @@ import com.students.smartwarehouse.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List; // <-- BUNU EKLEMEYİ UNUTMA
+
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -15,9 +17,15 @@ public class OrderController {
         this.orderService = orderService;
     }
 
+    // YENİ EKLENEN KISIM: LİSTELEME (GET)
+    @GetMapping
+    public ResponseEntity<List<Order>> getAllOrders() {
+        return ResponseEntity.ok(orderService.getAllOrders());
+    }
+
+    // ESKİ KISIM: KAYDETME (POST)
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody Order order) {
-        // Sipariş gelince Service katmanı stoğu otomatik düşürecek/artıracak
         return ResponseEntity.ok(orderService.createOrder(order));
     }
 }
