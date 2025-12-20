@@ -20,18 +20,17 @@ public class Stock {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // İLİŞKİ: Her stoğun bir ürünü vardır. (One-To-One)
     @OneToOne
     @JoinColumn(name = "product_id", nullable = false, unique = true)
     private Product product;
 
     @Column(nullable = false)
-    private Integer quantity; // Mevcut miktar
+    private Integer quantity;
 
     @Column(name = "minimum_quantity", nullable = false)
-    private Integer minimumQuantity; // Kritik eşik (bunun altına düşerse uyarı verir)
+    private Integer minimumQuantity;
 
-    @UpdateTimestamp // Her güncellendiğinde tarihi otomatik yeniler
-    @Column(name = "last_updated")
-    private LocalDateTime lastUpdated;
+    @UpdateTimestamp
+    @Column(name = "updated_at") 
+    private LocalDateTime updatedAt;
 }
