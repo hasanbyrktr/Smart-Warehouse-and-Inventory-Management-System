@@ -121,7 +121,7 @@ const Orders = () => {
                         <div style={{ display: 'flex', gap: '10px' }}>
                             {/* --- EXCEL BUTONU --- */}
                             <button onClick={exportToExcel} style={excelButtonStyle} title="Listeyi İndir">
-                                📥 Excel
+                                 Excel'e Aktar 🡕
                             </button>
 
                             <input type="text" placeholder="🔍 İşlem ara..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} style={{ ...inputStyle, padding: '8px', width: '150px', fontSize: '13px' }} />

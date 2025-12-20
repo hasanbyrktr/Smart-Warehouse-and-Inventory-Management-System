@@ -73,7 +73,7 @@ const Stocks = () => {
 
     const getSortIndicator = (key) => {
         if (sortConfig.key !== key) return <span style={{opacity: 0.3}}> ↕</span>;
-        return sortConfig.direction === 'asc' ? ' 🔼' : ' 🔽';
+        return sortConfig.direction === 'asc' ? ' ▲' : ' ▼';
     };
 
     const cardStyle = { backgroundColor: 'white', padding: '30px', borderRadius: '20px', marginBottom: '30px', boxShadow: '0 4px 15px rgba(0,0,0,0.05)' };
@@ -141,11 +141,11 @@ const Stocks = () => {
                                                 <div style={{ minWidth: '80px' }}>
                                                     {isCritical ? (
                                                         <span style={{ backgroundColor: '#FED7D7', color: '#C53030', padding: '5px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '800' }}>
-                                                            ⚠️ KRİTİK
+                                                            ! KRİTİK
                                                         </span>
                                                     ) : (
                                                         <span style={{ backgroundColor: '#C6F6D5', color: '#2F855A', padding: '5px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: '800' }}>
-                                                            ✅ YETERLİ
+                                                            ✓ YETERLİ
                                                         </span>
                                                     )}
                                                 </div>

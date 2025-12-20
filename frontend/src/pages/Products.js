@@ -143,7 +143,7 @@ const Products = () => {
                                     <td>{p.supplier?.name || '---'}</td>
                                     <td style={{ textAlign: 'right', paddingRight: '20px' }}>
                                         <button onClick={() => deleteProduct(p.id)} style={deleteButtonStyle} onMouseOver={(e) => { e.currentTarget.style.backgroundColor = '#FEB2B2'; }} onMouseOut={(e) => { e.currentTarget.style.backgroundColor = '#FFF5F5'; }}>
-                                            <span>🗑️</span> Sil
+                                            <span>⭙</span> Sil
                                         </button>
                                     </td>
                                 </tr>

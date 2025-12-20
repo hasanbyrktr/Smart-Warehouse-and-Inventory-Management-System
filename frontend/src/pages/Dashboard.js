@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-// YENİ: Grafik Kütüphanesi
+// Grafik Kütüphanesi
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const Dashboard = () => {
@@ -16,7 +16,7 @@ const Dashboard = () => {
         cardShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
     };
 
-    // Grafik Renkleri (Mavi, Yeşil, Sarı, Turuncu, Mor)
+    // Grafik Renkleri
     const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8'];
 
     useEffect(() => {
@@ -40,7 +40,7 @@ const Dashboard = () => {
         return () => clearInterval(interval);
     }, [products]);
 
-    // Tahmin Verisi Çekme
+    // Tahmin Verisi
     useEffect(() => {
         if (products.length === 0) return;
         const currentProduct = products[currentIndex];
@@ -57,10 +57,14 @@ const Dashboard = () => {
     }, [currentIndex, products]);
 
     const totalValue = stocks.reduce((acc, curr) => acc + (curr.quantity * curr.product.price), 0);
+    
+    // Kritik Stokları Filtrele
     const criticalStocks = stocks.filter(s => s.quantity < s.minimumQuantity);
+    
+    // --- YENİ MANTIK: HER ŞEY YOLUNDA MI? ---
+    const isAllSafe = criticalStocks.length === 0;
 
-    // --- GRAFİK VERİSİ HAZIRLAMA ---
-    // Stok miktarına göre çoktan aza sırala ve ilk 5'i al
+    // Grafik Verisi Hazırlama
     const chartData = stocks
         .sort((a, b) => b.quantity - a.quantity)
         .slice(0, 5)
@@ -107,10 +111,10 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* --- YENİ BÖLÜM: GRAFİK ve TABLO YAN YANA --- */}
+            {/* --- GRAFİK ve DURUM TABLOSU --- */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '30px' }}>
                 
-                {/* SOL: STOK DAĞILIMI PASTA GRAFİĞİ */}
+                {/* SOL: PASTA GRAFİĞİ */}
                 <div style={cardStyle(theme)}>
                     <h3 style={{ color: theme.primary, fontSize: '18px', marginBottom: '20px' }}>📊 Stok Dağılımı (Top 5)</h3>
                     <div style={{ width: '100%', height: '300px' }}>
@@ -121,7 +125,7 @@ const Dashboard = () => {
                                         data={chartData}
                                         cx="50%"
                                         cy="50%"
-                                        innerRadius={60} // Ortası delik (Donut Chart)
+                                        innerRadius={60}
                                         outerRadius={100}
                                         fill="#8884d8"
                                         paddingAngle={5}
@@ -141,10 +145,22 @@ const Dashboard = () => {
                     </div>
                 </div>
 
-                {/* SAĞ: KRİTİK UYARI TABLOSU */}
-                <div style={{ ...cardStyle(theme), border: '1px solid #FED7D7', backgroundColor: '#FFF5F5' }}>
-                    <h3 style={{ color: '#C53030', fontSize: '18px', marginBottom: '15px' }}>⚠️ Kritik Stok Seviyesi</h3>
-                    {criticalStocks.length > 0 ? (
+                {/* SAĞ: KRİTİK UYARI KUTUSU (AKILLI RENKLENDİRME) */}
+                <div style={{ 
+                    ...cardStyle(theme), 
+                    // Eğer hepsi güvenliyse YEŞİL, değilse KIRMIZI tema
+                    border: isAllSafe ? '1px solid #C6F6D5' : '1px solid #FED7D7', 
+                    backgroundColor: isAllSafe ? '#F0FFF4' : '#FFF5F5' 
+                }}>
+                    <h3 style={{ 
+                        color: isAllSafe ? '#2F855A' : '#C53030', // Yeşil Yazı vs Kırmızı Yazı
+                        fontSize: '18px', 
+                        marginBottom: '15px' 
+                    }}>
+                        {isAllSafe ? '✅ Stok Durumu İdeal' : '⚠️ Kritik Stok Seviyesi'}
+                    </h3>
+                    
+                    {!isAllSafe ? (
                         <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
@@ -166,9 +182,10 @@ const Dashboard = () => {
                             </table>
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px', color: '#718096' }}>
-                            <span style={{ fontSize: '40px' }}>✅</span>
-                            <p>Tüm stok seviyeleri ideal.</p>
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '200px', color: '#48BB78' }}>
+                            <span style={{ fontSize: '50px' }}>✓</span>
+                            <p style={{ fontWeight: '600', marginTop: '10px' }}>Tüm ürünler yeterli seviyede.</p>
+                            <p style={{ fontSize: '13px', opacity: 0.8 }}>Kritik eşiğin altında ürün yok.</p>
                         </div>
                     )}
                 </div>
