@@ -1,7 +1,7 @@
 # 📦 Akıllı Depo ve Envanter Yönetim Sistemi (Smart Warehouse Management System)
 
-> **Ders:** Veritabanı Yönetim Sistemleri & Yazılım Proje Yönetimi  
-> **Dönem:** 2024-2025 Güz  
+> **Ders:** Veritabanı Yönetim Sistemleri & Java Programlama
+> **Dönem:** 2025-2026 Güz  
 > **Geliştiriciler:** Hasan Bayraktar, Betül Eren, Emine Nur Alioğlu
 
 ---
@@ -93,7 +93,7 @@ Projeyi sorunsuz çalıştırmak için aşağıdaki adımları sırasıyla uygul
 
 ## 🧪 5. Demo Senaryosu (Test Etmek İçin)
 
-Hocamızın veya test eden kişinin aşağıdaki senaryoyu denemesi önerilir:
+test eden kişinin aşağıdaki senaryoyu denemesi önerilir:
 
 1.  **Dashboard Kontrolü:** Ana sayfada pasta grafiğinin ve özet kartların dolu geldiğini teyit edin.
 2.  **Kritik Stok Testi:**
