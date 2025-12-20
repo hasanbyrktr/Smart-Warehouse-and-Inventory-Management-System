@@ -64,21 +64,30 @@ Projeyi sorunsuz çalıştırmak için aşağıdaki adımları sırasıyla uygul
     ```sql
     CREATE DATABASE smartwarehouse_db;
     ```
-3.  Proje dosyasındaki `2_Veritabani` klasöründe bulunan **`.sql` (dump)** dosyasını açın ve içeriğini MySQL'de çalıştırarak tabloları ve demo verileri yükleyin.
 
 ### ADIM 2: Backend (Sunucu) Başlatma ☕
-1.  `1_Kaynak_Kodlar/Backend_SpringBoot` klasörünü IDE (IntelliJ, Eclipse veya VS Code) ile açın.
+1.  `/Backend` klasörünü IDE (IntelliJ, Eclipse veya VS Code) ile açın.
 2.  `src/main/resources/application.properties` dosyasını açın.
 3.  Kendi MySQL kullanıcı adı ve şifrenizi güncelleyin:
     ```properties
     spring.datasource.username=root
     spring.datasource.password=SENIN_MYSQL_SIFREN
     ```
-4.  Projeyi `Maven` ile derleyin veya IDE üzerindeki **Run** butonuna basarak `SmartWarehouseApplication.java` dosyasını çalıştırın.
-5.  Konsolda `Started SmartWarehouseApplication in ... seconds` yazısını gördüğünüzde sunucu **8080** portunda çalışıyor demektir.
+4. Projeyi çalıştırmak için IDE üzerindeki **Run** butonuna basabilir veya proje klasöründe terminal açıp şu komutu girebilirsiniz:
+
+   **Windows için:**
+   ```bash
+   mvnw spring-boot:run
+   ```
+   **Mac veya Linux için:**
+   ```bash
+   ./mvnw spring-boot:run
+   ```
+   
+6.  Konsolda `Started SmartWarehouseApplication in ... seconds` yazısını gördüğünüzde sunucu **8080** portunda çalışıyor demektir.
 
 ### ADIM 3: Frontend (Arayüz) Başlatma ⚛️
-1.  Terminali açın ve `1_Kaynak_Kodlar/Frontend_React` klasörünün içine girin.
+1.  Terminali açın ve `/Frontend` klasörünün içine girin.
 2.  Gerekli kütüphanelerin yüklenmesi için şu komutu çalıştırın (Bu işlem internet hızına göre 1-2 dk sürebilir):
     ```bash
     npm install
@@ -103,7 +112,7 @@ test eden kişinin aşağıdaki senaryoyu denemesi önerilir:
     * "Sipariş & Sevkiyat" sayfasına gidin.
     * Az önce belirlediğiniz ürüne "Giriş (IN)" işlemi yaparak stok ekleyin (Örn: 100 adet).
     * Tekrar "Stok Durumu" sayfasına dönün; ürünün **Yeşil (Yeterli)** duruma geçtiğini ve barın dolduğunu gözlemleyin.
-4.  **Raporlama:** "Sipariş" sayfasındaki **"📥 Excel"** butonuna basarak geçmişi indirin.
+4.  **Raporlama:** "Sipariş" sayfasındaki **"Excel"** butonuna basarak geçmişi indirin.
 
 ---
 
