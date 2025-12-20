@@ -23,10 +23,10 @@ const Orders = () => {
         e.preventDefault();
         try {
             await axios.post("http://localhost:8080/api/orders", {
-                product: { id: parseInt(newOrder.productId) }, // Java Long beklediği için ID nesne içinde gitmeli
+                product: { id: parseInt(newOrder.productId) },
                 quantity: parseInt(newOrder.quantity),
-                orderType: newOrder.orderType, // Java'daki OrderType Enum (IN/OUT)
-                status: "COMPLETED" // Backend varsayılanı ile uyumlu
+                orderType: newOrder.orderType,
+                status: "COMPLETED"
             });
             alert("Stok işlemi başarıyla kaydedildi!");
             fetchData();
@@ -57,27 +57,33 @@ const Orders = () => {
                     </form>
                 </div>
 
-                {/* SAĞ: GEÇMİŞ İŞLEMLER */}
+                {/* SAĞ: GEÇMİŞ İŞLEMLER (SCROLL EKLENDİ) */}
                 <div style={cardStyle}>
-                    <h3 style={{ color: theme.primary }}>Son Hareketler</h3>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-                        <thead>
-                            <tr style={{ textAlign: 'left', borderBottom: '2px solid #E2E8F0' }}>
-                                <th style={{ padding: '10px' }}>ÜRÜN</th>
-                                <th>TİP</th>
-                                <th>ADET</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {orders.map(o => (
-                                <tr key={o.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
-                                    <td style={{ padding: '10px' }}>{o.product.name}</td>
-                                    <td style={{ color: o.orderType === 'IN' ? 'green' : 'red', fontWeight: 'bold' }}>{o.orderType}</td>
-                                    <td>{o.quantity}</td>
+                    <h3 style={{ color: theme.primary, marginBottom: '15px' }}>Son Hareketler</h3>
+                    
+                    {/* --- SCROLL BAŞLANGICI --- */}
+                    <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #E2E8F0', borderRadius: '8px' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                            <thead style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1, boxShadow: '0 2px 5px rgba(0,0,0,0.05)' }}>
+                                <tr style={{ textAlign: 'left', borderBottom: '2px solid #E2E8F0' }}>
+                                    <th style={{ padding: '12px' }}>ÜRÜN</th>
+                                    <th>TİP</th>
+                                    <th>ADET</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {orders.map(o => (
+                                    <tr key={o.id} style={{ borderBottom: '1px solid #F1F5F9' }}>
+                                        <td style={{ padding: '10px' }}>{o.product?.name}</td>
+                                        <td style={{ color: o.orderType === 'IN' ? 'green' : 'red', fontWeight: 'bold' }}>{o.orderType}</td>
+                                        <td>{o.quantity}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                    {/* --- SCROLL BİTİŞİ --- */}
+
                 </div>
             </div>
         </div>

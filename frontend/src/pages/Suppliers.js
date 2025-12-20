@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const Suppliers = () => {
     const [suppliers, setSuppliers] = useState([]);
-    const [newSupplier, setNewSupplier] = useState({ name: '', contact: '', email: '' });
+    const [newSupplier, setNewSupplier] = useState({ name: '', phone: '', email: '' });
 
     const theme = {
         primary: '#2D3748',
@@ -64,7 +64,7 @@ const Suppliers = () => {
                 <h4 style={{ color: theme.accent, marginBottom: '20px' }}>Yeni Tedarikçi Kaydı</h4>
                 <form onSubmit={handleAdd} style={{ display: 'flex', gap: '15px' }}>
                     <input style={inputStyle} placeholder="Firma Adı" value={newSupplier.name} onChange={e => setNewSupplier({ ...newSupplier, name: e.target.value })} required />
-                    <input style={inputStyle} placeholder="İletişim" value={newSupplier.contact} onChange={e => setNewSupplier({ ...newSupplier, contact: e.target.value })} />
+                    <input style={inputStyle} placeholder="İletişim" value={newSupplier.phone} onChange={e => setNewSupplier({ ...newSupplier, phone: e.target.value })} />
                     <input style={inputStyle} placeholder="E-posta" value={newSupplier.email} onChange={e => setNewSupplier({ ...newSupplier, email: e.target.value })} />
                     <button type="submit" style={addButtonStyle(theme)}>+ EKLE</button>
                 </form>

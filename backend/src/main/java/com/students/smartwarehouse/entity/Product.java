@@ -1,6 +1,6 @@
 package com.students.smartwarehouse.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore; // <-- BU EKLENDİ
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -9,7 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List; // <-- BU EKLENDİ
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -38,20 +38,28 @@ public class Product {
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    // --- MEVCUT TEDARİKÇİ İLİŞKİSİ ---
+    // --- MEVCUT İLİŞKİLER ---
+
     @ManyToOne
     @JoinColumn(name = "supplier_id")
     private Supplier supplier;
 
-    // --- YENİ EKLENEN 1: STOK SİLME AYARI ---
-    // Ürün silinince, Stok tablosundaki miktar bilgisi de silinsin
+    // 1. STOK SİLME AYARI (Cascade)
+    // Ürün silinince, Stok tablosundaki miktar bilgisi de otomatik silinir.
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private Stock stock;
 
-    // --- YENİ EKLENEN 2: SİPARİŞ SİLME AYARI ---
-    // Ürün silinince, o ürünün tüm geçmiş siparişleri de silinsin
+    // 2. SİPARİŞ SİLME AYARI (Cascade)
+    // Ürün silinince, o ürünün tüm geçmiş siparişleri de otomatik silinir.
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Order> orders;
+
+    // --- YENİ EKLENEN: TAŞIYICI ALAN (Dinamik Eşik İçin) ---
+    // @Transient: Bu alan veritabanında "products" tablosuna kolon olarak EKLENMEZ.
+    // Sadece Frontend'den gelen "Kritik Stok Sınırı" (örn: 10, 20) bilgisini
+    // Service katmanına taşıyıp Stock tablosuna kaydetmek için kullanılır.
+    @Transient
+    private Integer initialStockLimit;
 }

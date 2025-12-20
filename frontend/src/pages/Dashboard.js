@@ -5,6 +5,7 @@ const Dashboard = () => {
     const [products, setProducts] = useState([]);
     const [stocks, setStocks] = useState([]);
     const [forecast, setForecast] = useState(null);
+    const [currentIndex, setCurrentIndex] = useState(0); // Hangi üründe olduğumuzu tutar
 
     const theme = {
         primary: '#2D3748', // Antrasit
@@ -13,26 +14,57 @@ const Dashboard = () => {
         cardShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)'
     };
 
+    // 1. ADIM: Sayfa açılınca Ürünleri ve Stokları Çek
     useEffect(() => {
-        // 1. Toplam Ürün Sayısı için API çağrısı
-        axios.get("http://localhost:8080/api/products")
-            .then(res => setProducts(res.data))
-            .catch(err => console.error("Ürünler çekilemedi:", err));
+        const fetchInitialData = async () => {
+            try {
+                const prodRes = await axios.get("http://localhost:8080/api/products");
+                setProducts(prodRes.data);
 
-        // 2. Kritik Uyarılar & Stok Değeri için API çağrısı
-        axios.get("http://localhost:8080/api/stocks")
-            .then(res => setStocks(res.data))
-            .catch(err => console.error("Stoklar çekilemedi:", err));
-
-        // 3. AI Tahminleme (Örnek Ürün ID: 1)
-        axios.get("http://localhost:8080/api/forecast/1")
-            .then(res => setForecast(res.data))
-            .catch(err => console.log("Tahmin verisi henüz yok"));
+                const stockRes = await axios.get("http://localhost:8080/api/stocks");
+                setStocks(stockRes.data);
+            } catch (err) {
+                console.error("Veri hatası:", err);
+            }
+        };
+        fetchInitialData();
     }, []);
 
+    // 2. ADIM: Her 10 saniyede bir sıradaki ürüne geç
+    useEffect(() => {
+        if (products.length === 0) return; // Ürün yoksa çalışma
 
+        const interval = setInterval(() => {
+            setCurrentIndex((prevIndex) => (prevIndex + 1) % products.length); // Başa döngü (Loop)
+        }, 10000); // 10 Saniye
+
+        return () => clearInterval(interval); // Sayfadan çıkınca sayacı durdur
+    }, [products]);
+
+    // 3. ADIM: Sıra değiştiğinde o ürünün tahminini çek
+    useEffect(() => {
+        if (products.length === 0) return;
+
+        const currentProduct = products[currentIndex];
+        
+        // Yükleniyor efekti için önce boşaltalım (isteğe bağlı)
+        // setForecast(null); 
+
+        axios.get(`http://localhost:8080/api/forecast/${currentProduct.id}`)
+            .then(res => setForecast(res.data))
+            .catch(() => {
+                // Eğer hata alırsak (tahmin yoksa) elle sahte veri basalım ki boş durmasın
+                setForecast({ 
+                    productName: currentProduct.name, 
+                    dailyUsageRate: 0, // Tahmin yoksa 0
+                    estimatedValue: 0 
+                });
+            });
+
+    }, [currentIndex, products]);
+
+    // Hesaplamalar
     const totalValue = stocks.reduce((acc, curr) => acc + (curr.quantity * curr.product.price), 0);
-
     const criticalStocks = stocks.filter(s => s.quantity < s.minimumQuantity);
 
     return (
@@ -42,27 +74,59 @@ const Dashboard = () => {
                 <p style={{ color: '#64748B', marginTop: '5px' }}>Depo genel durumu ve kritik metrikler</p>
             </header>
 
-            {/* ÜST KARTLAR (Madde 2-A) */}
+            {/* KARTLAR */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '25px', marginBottom: '40px' }}>
+                
+                {/* 1. KART: Toplam Ürün */}
                 <div style={cardStyle(theme)}>
                     <span style={labelStyle}>TOPLAM ÜRÜN</span>
                     <div style={valueStyle(theme.primary)}>{products.length} Adet</div>
                 </div>
 
+                {/* 2. KART: Toplam Değer */}
                 <div style={cardStyle(theme)}>
                     <span style={labelStyle}>TOPLAM STOK DEĞERİ</span>
                     <div style={valueStyle(theme.accent)}>{totalValue.toLocaleString()} TRY</div>
                 </div>
 
+                {/* 3. KART: CANLI AI TAHMİNİ (Slayt) */}
                 <div style={cardStyle(theme)}>
-                    <span style={labelStyle}>GELECEK TAHMİNİ (AI)</span>
-                    <div style={{ fontSize: '14px', fontWeight: '600', marginTop: '10px', color: theme.primary }}>
-                        {forecast ? `${forecast.productName} için önümüzdeki ay ${forecast.estimatedValue} adet talep bekleniyor.` : "Analiz bekleniyor..."}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={labelStyle}>GELECEK AY TAHMİNİ</span>
+                        {/* Sağ üstte minik sayaç/gösterge */}
+                        <span style={{ fontSize: '10px', color: '#CBD5E0', fontWeight: 'bold' }}>
+                            {currentIndex + 1} / {products.length}
+                        </span>
+                    </div>
+
+                    <div style={{ fontSize: '14px', fontWeight: '600', marginTop: '10px', color: theme.primary, minHeight: '60px' }}>
+                        {forecast ? (
+                            <div style={{ animation: 'fadeIn 0.5s ease-in-out' }}>
+                                <span style={{ color: theme.accent, fontWeight: '800', fontSize: '20px' }}>
+                                    {Math.ceil(forecast.dailyUsageRate * 30)}
+                                </span> 
+                                <span style={{ marginLeft: '5px' }}>adet talep bekleniyor.</span>
+                                
+                                <div style={{ 
+                                    fontSize: '13px', 
+                                    color: '#64748B', 
+                                    marginTop: '8px', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    gap: '6px' 
+                                }}>
+                                    <span style={{ width: '8px', height: '8px', backgroundColor: theme.accent, borderRadius: '50%', display: 'inline-block' }}></span>
+                                    {forecast.productName}
+                                </div>
+                            </div>
+                        ) : (
+                            <span style={{ color: '#A0AEC0' }}>Veriler analiz ediliyor...</span>
+                        )}
                     </div>
                 </div>
             </div>
 
-            {/* KRİTİK UYARI TABLOSU (Madde 2-A) */}
+            {/* KRİTİK STOK TABLOSU */}
             <div style={{ ...cardStyle(theme), border: '1px solid #FED7D7', backgroundColor: '#FFF5F5' }}>
                 <h3 style={{ color: '#C53030', fontSize: '18px', marginBottom: '15px' }}>⚠️ DİKKAT! Stok Seviyesi Kritik Ürünler</h3>
                 {criticalStocks.length > 0 ? (
@@ -88,17 +152,23 @@ const Dashboard = () => {
                     <p style={{ color: '#718096' }}>Şu an kritik seviyede ürün bulunmuyor.</p>
                 )}
             </div>
+            
+            {/* Animasyon stili */}
+            <style>{`@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         </div>
     );
 };
 
-// CSS-in-JS Stilleri
+// Stiller
 const cardStyle = (theme) => ({
     backgroundColor: '#FFFFFF',
     borderRadius: '20px',
     padding: '30px',
     boxShadow: theme.cardShadow,
-    border: '1px solid rgba(226, 232, 240, 0.8)'
+    border: '1px solid rgba(226, 232, 240, 0.8)',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center'
 });
 
 const labelStyle = { color: '#64748B', fontSize: '12px', fontWeight: '800', letterSpacing: '1px' };

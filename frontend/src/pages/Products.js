@@ -4,7 +4,15 @@ import axios from 'axios';
 const Products = () => {
     const [products, setProducts] = useState([]);
     const [suppliers, setSuppliers] = useState([]);
-    const [newProduct, setNewProduct] = useState({ name: '', price: '', sku: '', supplierId: '' });
+    
+    // Yeni ürün verileri (Kritik Stok Eşiği dahil)
+    const [newProduct, setNewProduct] = useState({ 
+        name: '', 
+        price: '', 
+        sku: '', 
+        supplierId: '', 
+        initialStockLimit: '' 
+    });
 
     const theme = {
         primary: '#2D3748',
@@ -31,9 +39,12 @@ const Products = () => {
                 name: newProduct.name,
                 price: parseFloat(newProduct.price),
                 sku: newProduct.sku,
-                supplier: { id: parseInt(newProduct.supplierId) }
+                supplier: { id: parseInt(newProduct.supplierId) },
+                // Backend'e stok limitini gönderiyoruz
+                initialStockLimit: newProduct.initialStockLimit ? parseInt(newProduct.initialStockLimit) : null
             });
-            setNewProduct({ name: '', price: '', sku: '', supplierId: '' });
+            
+            setNewProduct({ name: '', price: '', sku: '', supplierId: '', initialStockLimit: '' });
             fetchData();
         } catch (err) { alert("Ürün eklenemedi! SKU benzersiz olmalı."); }
     };
@@ -43,7 +54,11 @@ const Products = () => {
             try {
                 await axios.delete(`http://localhost:8080/api/products/${id}`);
                 fetchData();
-            } catch (err) { alert("Silme başarısız! Bu ürünün stok hareketleri olabilir."); }
+                alert("Ürün başarıyla sistemden kaldırıldı. ✅");
+            } catch (err) { 
+                // GÜNCELLENEN HATA MESAJI
+                alert("⛔ İŞLEM ENGELLENDİ!\n\nBu ürüne ait geçmiş Sipariş veya Stok kayıtları bulunmaktadır.\n\nVeri güvenliği nedeniyle, geçmiş hareketi olan ürünler silinemez. Sadece satışı durdurulabilir."); 
+            }
         }
     };
 
@@ -68,19 +83,52 @@ const Products = () => {
             <header style={{ marginBottom: '40px' }}>
                 <h1 style={{ fontSize: '28px', fontWeight: '800', color: theme.primary }}>Ürün Yönetimi</h1>
                 <p style={{ color: '#64748B' }}>Sisteme kayıtlı ürünlerin listesi ve düzenleme alanı</p>
+
+                {/* --- YENİ BİLGİLENDİRME KUTUSU (SARI KUTU) --- */}
+                <div style={{ 
+                    marginTop: '20px', 
+                    padding: '15px', 
+                    backgroundColor: '#FFFBEB', // Açık Sarı Zemin
+                    border: '1px solid #FCD34D', // Sarı Çerçeve
+                    borderRadius: '10px', 
+                    color: '#92400E', // Koyu Turuncu Yazı
+                    fontSize: '14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    maxWidth: '800px' // Çok geniş ekranda aşırı uzamasın diye
+                }}>
+                    <span style={{ fontSize: '20px' }}>ℹ️</span>
+                    <div>
+                        <strong>Bilgilendirme:</strong> Veri bütünlüğü ilkesi gereği, geçmişte <u>sipariş veya stok hareketi</u> bulunan ürünler sistemden tamamen silinemez.
+                    </div>
+                </div>
+                {/* ------------------------------------------- */}
             </header>
 
             {/* EKLEME FORMU */}
             <div style={cardStyle}>
                 <h4 style={{ color: theme.accent, marginBottom: '20px' }}>Yeni Ürün Ekle</h4>
-                <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '15px' }}>
+                <form onSubmit={handleAddProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '15px' }}>
+                    
                     <input style={inputStyle} placeholder="Ürün Adı" value={newProduct.name} onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} required />
                     <input style={inputStyle} type="number" placeholder="Fiyat" value={newProduct.price} onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} required />
                     <input style={inputStyle} placeholder="SKU (Kod)" value={newProduct.sku} onChange={e => setNewProduct({ ...newProduct, sku: e.target.value })} required />
+                    
+                    {/* Kritik Stok Eşiği Inputu */}
+                    <input 
+                        style={inputStyle} 
+                        type="number" 
+                        placeholder="Kritik Stok Eşiği (Örn: 10)" 
+                        value={newProduct.initialStockLimit} 
+                        onChange={e => setNewProduct({ ...newProduct, initialStockLimit: e.target.value })} 
+                    />
+
                     <select style={inputStyle} value={newProduct.supplierId} onChange={e => setNewProduct({ ...newProduct, supplierId: e.target.value })} required>
                         <option value="">Tedarikçi Seçin</option>
                         {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
+
                     <button type="submit" style={addButtonStyle(theme)}>KAYDET</button>
                 </form>
             </div>

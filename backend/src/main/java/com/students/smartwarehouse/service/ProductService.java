@@ -22,8 +22,6 @@ public class ProductService {
     public List<Product> getAllProducts() {
         return productRepository.findAll();
     }
-    
-
 
     public void deleteProduct(Long id) {
         productRepository.deleteById(id);
@@ -31,18 +29,25 @@ public class ProductService {
 
     @Transactional // Hem ürün hem stok tablosuna yazdığımız için işlem bütünlüğü şart
     public Product saveProduct(Product product) {
-        // 1. Ürünü kaydet
+        // KÖSTEBEK: Gelen veriyi konsola yazdırıp görelim
+        System.out.println("GELEN ÜRÜN: " + product.getName());
+        System.out.println("GELEN LİMİT: " + product.getInitialStockLimit()); 
+
         Product savedProduct = productRepository.save(product);
 
-        // 2. Ürün ilk kez ekleniyorsa, stok kaydını da 0 olarak oluştur (Otomatik)
         if (stockRepository.findByProductId(savedProduct.getId()).isEmpty()) {
             Stock newStock = new Stock();
             newStock.setProduct(savedProduct);
             newStock.setQuantity(0);
-            newStock.setMinimumQuantity(5); // Varsayılan kritik seviye
+
+            // Bizim kodumuz burasıydı:
+            int limit = (product.getInitialStockLimit() != null) ? product.getInitialStockLimit() : 5;
+            
+            System.out.println("AYARLANAN STOK LİMİTİ: " + limit); // Bunu da görelim
+
+            newStock.setMinimumQuantity(limit);
             stockRepository.save(newStock);
         }
-
         return savedProduct;
     }
 }
